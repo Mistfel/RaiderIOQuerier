@@ -124,7 +124,7 @@ function getGuildProfile()
 
 	$display_data = [
 		'Guild Name' => $request['name'],
-		'Faction' => $request['faction'],
+		'Faction' => ucfirst($request['faction']),
 		'Realm' => $request['realm'],
 		'Profile URL' => $request['profile_url'],
  	];
