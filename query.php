@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ERROR | E_PARSE);
+
 // Intro
 echo "\n--- Mistfel RaiderIO Query ---\n";
 echo "1: Character Profile\n";
@@ -20,9 +22,14 @@ $query_type_map = [
 
 echo "\n";
 
-// Run the search and save whatever was done last time
-$query_type_map[$query_type]();
-exit;
+if (!$query_type_map[$query_type]) {
+	echo "No function found.";
+	exit;
+} else {	
+	// Run the search and save whatever was done last time
+	$query_type_map[$query_type]();
+	exit;
+}
 
 function getCharacterProfile()
 {
@@ -57,6 +64,44 @@ function getCharacterProfile()
 
  	if ($request['mythic_plus_ranks']['class_healer']) {
  		$display_data['Mythic Plus - Rank - Class Healer (World / Region / Realm)'] = $request['mythic_plus_ranks']['class_healer']['world'] . " / " . $request['mythic_plus_ranks']['class_healer']['region'] . " / " . $request['mythic_plus_ranks']['class_healer']['realm'];
+ 	}
+
+ 	if ($request['mythic_plus_best_runs']) {
+ 		$display_data['Best Mythic Plus Runs'] = "";
+ 		for ($i=0; $i < count($request['mythic_plus_best_runs']); $i++) { 
+ 			$dungeon_run = $request['mythic_plus_best_runs'][$i];
+
+ 			$dungeon_name = $dungeon_run['dungeon'];
+ 			$key_level = $dungeon_run['mythic_level'];
+ 			$completed_date = date_create($dungeon_run['completed_at']);
+ 			$keystone_upgrade = "+" . $dungeon_run['num_keystone_upgrades'];
+ 			$affixes = [];
+ 			
+ 			foreach ($dungeon_run['affixes'] as $affix) {
+ 				$affixes[] = $affix['name'];
+ 			}
+
+ 			$display_data['Best Run - ' . $i + 1] = $dungeon_name . " / " . $key_level . " / " . date_format($completed_date, "Y/m/d H:i:s") . " / " . $keystone_upgrade . " / " . implode(", ", $affixes);
+ 		}
+ 	}
+
+ 	if ($request['mythic_plus_recent_runs']) {
+ 		$display_data['Recent Mythic Plus Runs'] = "";
+ 		for ($i=0; $i < count($request['mythic_plus_recent_runs']); $i++) { 
+ 			$dungeon_run = $request['mythic_plus_recent_runs'][$i];
+
+ 			$dungeon_name = $dungeon_run['dungeon'];
+ 			$key_level = $dungeon_run['mythic_level'];
+ 			$completed_date = date_create($dungeon_run['completed_at']);
+ 			$keystone_upgrade = "+" . $dungeon_run['num_keystone_upgrades'];
+ 			$affixes = [];
+ 			
+ 			foreach ($dungeon_run['affixes'] as $affix) {
+ 				$affixes[] = $affix['name'];
+ 			}
+
+ 			$display_data['Recent Run - ' . $i + 1] = $dungeon_name . " / " . $key_level . " / " . date_format($completed_date, "Y/m/d H:i:s") . " / " . $keystone_upgrade . " / " . implode(", ", $affixes);
+ 		}
  	}
 
  	return display($display_data);
@@ -126,8 +171,10 @@ function getGuildBossKillInfo()
  		$display_data["Player " . $roster_no + 1 . ":"] = $roster_member_name . " - " . $roster_member_race . " - " . $roster_member_class . " - " . $roster_member_spec . " - " . $roster_member_role . " - " . $roster_member_ilvl . " ilvl";
   	}
 
+
   	return display($display_data);
 }
+
 
 function getMythicPlusAffixes()
 {
@@ -197,4 +244,4 @@ function saveSearch($display_string = "")
 	file_put_contents($save_file, $display_string);
 }
 
-?>
+?>;
